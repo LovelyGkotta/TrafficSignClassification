@@ -1,8 +1,7 @@
 import numpy as np
 import cv2
-import pickle
 from tensorflow import keras
-from keras import models
+from PIL import Image, ImageDraw, ImageFont
 
 model = keras.models.load_model('my_model')
 cam = cv2.VideoCapture(0)
@@ -22,68 +21,79 @@ def preprocessing(img):
 
 def getClassName(classNo):
     if classNo == 0:
-        return 'Speed Limit 20 km/h'
+        return '通行止め'
     elif classNo == 1:
-        return 'Speed Limit 30 km/h'
+        return '自転車通行止め'
     elif classNo == 2:
-        return 'Speed Limit 50 km/h'
+        return '駐車禁止'
     elif classNo == 3:
-        return 'Speed Limit 60 km/h'
+        return '一方通行(左)'
     elif classNo == 4:
-        return 'Speed Limit 70 km/h'
+        return '一方通行(前)'
     elif classNo == 5:
-        return 'Speed Limit 80 km/h'
+        return '駐車可'
     elif classNo == 6:
-        return 'End of Speed Limit 80 km/h'
+        return '横断歩道'
     elif classNo == 7:
-        return 'Speed Limit 100 km/h'
+        return '優先道路'
     elif classNo == 8:
-        return 'Speed Limit 120 km/h'
+        return '道路工事中'
     elif classNo == 9:
-        return 'No passing'
+        return '環状の交差点'
     elif classNo == 10:
-        return 'No passing for vechiles over 3.5 metric tons'
+        return '徐行'
     elif classNo == 11:
-        return 'Right-of-way at the next intersection'
+        return '最高速度40'
     elif classNo == 12:
-        return 'Priority road'
+        return '最高速度50'
     elif classNo == 13:
-        return 'Yield'
+        return '一時停止'
     elif classNo == 14:
-        return 'Stop'
+        return '直進以外進行禁止'
     elif classNo == 15:
-        return 'No vehicles'
+        return '信号機あり'
     elif classNo == 16:
-        return 'Vehicles over 3.5 metric tons prohibited'
+        return '左折以外進行禁止'
     elif classNo == 17:
-        return 'No entry'
+        return '右折以外進行禁止'
     elif classNo == 18:
-        return 'General caution'
+        return '二方向交通'
     elif classNo == 19:
-        return 'Dangerous curve to the left'
+        return '車両進入禁止'
+
+
+def addText(img, text, left, top, textcolor=(0, 255, 0), textsize=50):
+    if isinstance(img, np.ndarray):
+        img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        draw = ImageDraw.Draw(img)
+        fontText = ImageFont.truetype(
+            "font/simsun.ttc", textsize, encoding="utf-8")
+        draw.text((left, top), text, textcolor, font=fontText)
+        return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
+
 
 while True:
     # READ IMAGE
-    success, imgOrignal = cam.read()
+    success, imgOriginal = cam.read()
 
     # PROCESS IMAGE
-    img = np.asarray(imgOrignal)
+    img = np.asarray(imgOriginal)
     img = cv2.resize(img, (32, 32))
     img = preprocessing(img)
-    cv2.imshow("Processed Image", img)
     img = img.reshape(1, 32, 32, 1)
-    cv2.putText(imgOrignal, "CLASS: ", (20, 35), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
-    cv2.putText(imgOrignal, "PROBABILITY: ", (20, 75), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
-    print(int(model.predict_classes(img)))
+    # cv2.putText(imgOriginal, "標識種類: ", (20, 35), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+    imgOriginal = addText(imgOriginal, "標識種類:", 10, 35, (18, 11, 222), 25)
+    imgOriginal = addText(imgOriginal, "正確率:", 10, 75, (18, 11, 222), 25)
     # PREDICT IMAGE
-    # predictions = model.predict(img)
-    # classIndex = model.predict_step(img)
-    # probabilityValue = np.amax(predictions)
-
-    #print(getCalssName(classIndex))
-    cv2.putText(imgOrignal, str("classIndex") + " " + str(getClassName(1)), (120, 35), font, 0.75, (0, 0, 255),
-                2, cv2.LINE_AA)
-    cv2.putText(imgOrignal, str(round(0.3 * 100, 2)) + "%", (180, 75), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
-    cv2.imshow("Result", imgOrignal)
+    predictions = model.predict(img)
+    classIndex = np.argmax(predictions, axis=1)
+    probabilityValue = np.amax(predictions)
+    if probabilityValue > threshold:
+        imgOriginal = addText(imgOriginal, str(getClassName(classIndex)), 125, 35, (18, 11, 222), 25)
+        # cv2.putText(imgOriginal, str("classIndex") + " " + str(getClassName(classIndex)), (120, 35), font, 0.75, (0, 0, 255),
+        #             2, cv2.LINE_AA)
+        # cv2.putText(imgOriginal, str(round(probabilityValue * 100, 2)) + "%", (180, 75), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+        imgOriginal = addText(imgOriginal, str(round(probabilityValue * 100, 2)) + "%", 100, 75, (18, 11, 222), 25)
+    cv2.imshow("Result", imgOriginal)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
