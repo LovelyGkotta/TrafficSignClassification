@@ -2,7 +2,9 @@ import numpy as np
 import cv2
 from tensorflow import keras
 from PIL import Image, ImageDraw, ImageFont
+import os
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 model = keras.models.load_model('my_model')  # モデルを読み込む
 cam = cv2.VideoCapture(0)
 
@@ -67,6 +69,7 @@ def addText(img, text, left, top, textcolor=(0, 255, 0), textsize=50):
         img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
         draw = ImageDraw.Draw(img)
         fontText = ImageFont.truetype(
+            # on linux /usr/share/fonts/opentype/noto/NotoSansCJK-Ragular.ttc
             "font/simsun.ttc", textsize, encoding="utf-8")
         draw.text((left, top), text, textcolor, font=fontText)
         return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
@@ -86,7 +89,7 @@ while True:
     imgOriginal = addText(imgOriginal, "正確率:", 10, 75, (18, 11, 222), 25)
     # 標識を識別
     predictions = model.predict(img)
-    print(predictions.sharp)
+    print(predictions.shape)
     classIndex = np.argmax(predictions, axis=1)
     probabilityValue = np.amax(predictions)
 
