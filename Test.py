@@ -3,23 +3,22 @@ import cv2
 from tensorflow import keras
 from PIL import Image, ImageDraw, ImageFont
 
-model = keras.models.load_model('my_model')
+model = keras.models.load_model('my_model')  # モデルを読み込む
 cam = cv2.VideoCapture(0)
 
-threshold = 0.75  # PROBABLITY THRESHOLD
 font = cv2.FONT_HERSHEY_SIMPLEX
 cam.set(3, 640)
 cam.set(4, 640)
 
 
-def preprocessing(img):
+def preprocessing(img):  # 画像前処理の関数
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = cv2.equalizeHist(img)
     img = img / 255
     return img
 
 
-def getClassName(classNo):
+def getClassName(classNo):  # クラス
     if classNo == 0:
         return '通行止め'
     elif classNo == 1:
@@ -62,6 +61,7 @@ def getClassName(classNo):
         return '車両進入禁止'
 
 
+# 日本語描画（cv2.putTextは日本語を使えない）
 def addText(img, text, left, top, textcolor=(0, 255, 0), textsize=50):
     if isinstance(img, np.ndarray):
         img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
@@ -73,26 +73,25 @@ def addText(img, text, left, top, textcolor=(0, 255, 0), textsize=50):
 
 
 while True:
-    # READ IMAGE
+    # カメラから画像を読み込む
     success, imgOriginal = cam.read()
 
-    # PROCESS IMAGE
+    # 画像前処理
     img = np.asarray(imgOriginal)
     img = cv2.resize(img, (32, 32))
     img = preprocessing(img)
     img = img.reshape(1, 32, 32, 1)
-    # cv2.putText(imgOriginal, "標識種類: ", (20, 35), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+
     imgOriginal = addText(imgOriginal, "標識種類:", 10, 35, (18, 11, 222), 25)
     imgOriginal = addText(imgOriginal, "正確率:", 10, 75, (18, 11, 222), 25)
-    # PREDICT IMAGE
+    # 標識を識別
     predictions = model.predict(img)
+    print(predictions.sharp)
     classIndex = np.argmax(predictions, axis=1)
     probabilityValue = np.amax(predictions)
-    if probabilityValue > threshold:
+
+    if probabilityValue > 0.75:
         imgOriginal = addText(imgOriginal, str(getClassName(classIndex)), 125, 35, (18, 11, 222), 25)
-        # cv2.putText(imgOriginal, str("classIndex") + " " + str(getClassName(classIndex)), (120, 35), font, 0.75, (0, 0, 255),
-        #             2, cv2.LINE_AA)
-        # cv2.putText(imgOriginal, str(round(probabilityValue * 100, 2)) + "%", (180, 75), font, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
         imgOriginal = addText(imgOriginal, str(round(probabilityValue * 100, 2)) + "%", 100, 75, (18, 11, 222), 25)
     cv2.imshow("Result", imgOriginal)
     if cv2.waitKey(1) & 0xFF == ord('q'):
