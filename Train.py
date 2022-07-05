@@ -25,7 +25,7 @@ noOfClasses = len(myList)
 print("Importing Classes.....")
 for x in myList:
     myPicList = os.listdir(path + "/" + x)
-    for y in range(1, 401):
+    for y in range(1, 601):
         curImg = cv2.imread(path + "/" + x + "/" + str(y) + ".jpg")
         images.append(curImg)
         classNo.append(count)
@@ -44,9 +44,9 @@ X_train, X_validation, y_train, y_validation = train_test_split(X_train, y_train
 # データ配置を示す
 print("--------------------------")
 print("Data Shapes")
-print("Train", X_train.shape, y_train.shape)  # Train (5120, 32, 32, 3) (5120,)
-print("Validation", X_validation.shape, y_validation.shape)  # Validation (1280, 32, 32, 3) (1280,)
-print("Test", X_test.shape, y_test.shape)  # Test (1600, 32, 32, 3) (1600,)
+print("Train", X_train.shape, y_train.shape)  # Train (7680, 32, 32, 3) (7680,)
+print("Validation", X_validation.shape, y_validation.shape)  # Validation (1920, 32, 32, 3) (1920,)
+print("Test", X_test.shape, y_test.shape)  # Test (2400, 32, 32, 3) (2400,)
 
 
 def preprocessing(img):  # 画像の前処理
