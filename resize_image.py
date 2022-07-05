@@ -2,10 +2,10 @@ import cv2
 import numpy as np
 
 for i in range(1, 21):
-    path = """C:/Users/32885/Desktop/Data/closed/  (%s).jpg""" % (i)
+    path = "C:/Users/cyjjjj/Desktop/Data/vehicles_prohibited/(%s).jpg" % (i)
     img = cv2.imread(path)
     for j in range(1, 31):
-        new_path = """C:/Users/32885/Desktop/Data/closed/%s.jpg""" %((i-1)*20+j)
+        new_path = "C:/Users/cyjjjj/Desktop/Data/vehicles_prohibited/%s.jpg" % ((i-1)*30+j)
         (h, w) = img.shape[:2]
         center = (w // 2, h // 2)
 

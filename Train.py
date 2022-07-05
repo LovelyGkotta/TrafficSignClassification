@@ -9,7 +9,9 @@ from keras.utils.np_utils import to_categorical
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.image import ImageDataGenerator
+import os
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 path = 'Data'
 label = 'label.csv'
 
@@ -102,7 +104,7 @@ print(model.summary())  # ネットワークの構造をプリントする
 
 # モデルの訓練
 history = model.fit(dataGen.flow(X_train, y_train, batch_size=20),
-                    steps_per_epoch=len(X_train) // 20, epochs=20,
+                    steps_per_epoch=len(X_train) // 20, epochs=30,
                     validation_data=(X_validation, y_validation), shuffle=1)
 
 # loss 成功率
@@ -124,9 +126,5 @@ print('Test loss:', loss)
 print('Test Accuracy:', accuracy)
 
 # モデルを保存
-# model.save("my_model")
-print("Generate a prediction")
-print(X_test.shape)
-prediction = model.predict(X_test)
-print("prediction shape:", prediction.shape)
+model.save("my_model")
 cv2.waitKey(0)

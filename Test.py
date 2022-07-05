@@ -89,8 +89,7 @@ while True:
     imgOriginal = addText(imgOriginal, "正確率:", 10, 75, (18, 11, 222), 25)
     # 標識を識別
     predictions = model.predict(img)
-    print(predictions.shape)
-    classIndex = np.argmax(predictions, axis=1)
+    classIndex = np.argmax(predictions)
     probabilityValue = np.amax(predictions)
 
     if probabilityValue > 0.75:
