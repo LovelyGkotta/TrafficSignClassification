@@ -1,5 +1,4 @@
 import numpy as np
-import os
 import cv2
 import matplotlib.pyplot as plt
 from keras.models import Sequential
@@ -49,21 +48,14 @@ print("Validation", X_validation.shape, y_validation.shape)  # Validation (1920,
 print("Test", X_test.shape, y_test.shape)  # Test (2400, 32, 32, 3) (2400,)
 
 
-def preprocessing(img):  # 画像の前処理
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # グレースケールに変換
-    img = cv2.equalizeHist(img)
-    img = img / 255  # 値を0から1までの範囲にスケールする
-    return img
-
-
-X_train = np.array(list(map(preprocessing, X_train)))  # すべての画像を前処理する
-X_validation = np.array(list(map(preprocessing, X_validation)))
-X_test = np.array(list(map(preprocessing, X_test)))
+X_train = np.array(list(X_train / 255))  # すべての画像を0~255から0~1までの範囲にスケールする.
+X_validation = np.array(list(X_validation / 255))
+X_test = np.array(list(X_test / 255))
 
 # 1の深さを追加する
-X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2], 1)
-X_validation = X_validation.reshape(X_validation.shape[0], X_validation.shape[1], X_validation.shape[2], 1)
-X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[2], 1)
+X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2], 3)
+X_validation = X_validation.reshape(X_validation.shape[0], X_validation.shape[1], X_validation.shape[2], 3)
+X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[2], 3)
 
 # リアルタイムにデータ拡張する
 dataGen = ImageDataGenerator(width_shift_range=0.1,  # ランダムに水平シフトする範囲
@@ -71,6 +63,7 @@ dataGen = ImageDataGenerator(width_shift_range=0.1,  # ランダムに水平シ�
                              zoom_range=0.2,  # ランダムにズームする範囲
                              shear_range=0.1,  # 反時計回りのシアー角度
                              rotation_range=10)  # 画像をランダムに回転する回転範囲
+
 dataGen.fit(X_train)
 batches = dataGen.flow(X_train, y_train,
                        batch_size=20)
@@ -80,10 +73,11 @@ y_train = to_categorical(y_train, noOfClasses)
 y_validation = to_categorical(y_validation, noOfClasses)
 y_test = to_categorical(y_test, noOfClasses)
 
+
 # 畳み込みニューラルネットワークモデル
 model = Sequential()
 # 畳み込み層1，3*3畳み込みカーネル
-model.add((Conv2D(32, (3, 3), input_shape=(imageSize[0], imageSize[1], 1), activation='relu')))
+model.add((Conv2D(32, (3, 3), input_shape=(imageSize[0], imageSize[1], 3), activation='relu')))
 model.add(Conv2D(32, (3, 3), activation='relu'))
 # マックスプーリング層1，2*2カーネル
 model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -103,9 +97,9 @@ model.compile(Adam(learning_rate=0.001), loss='categorical_crossentropy', metric
 print(model.summary())  # ネットワークの構造をプリントする
 
 # モデルの訓練
-history = model.fit(dataGen.flow(X_train, y_train, batch_size=20),
-                    steps_per_epoch=len(X_train) // 20, epochs=30,
-                    validation_data=(X_validation, y_validation), shuffle=1)
+history = model.fit(dataGen.flow(X_train, y_train, batch_size=30),
+                    steps_per_epoch=len(X_train) // 30, epochs=30,
+                    validation_data=(X_validation, y_validation), shuffle=True)
 
 # loss 成功率
 fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(18, 5))

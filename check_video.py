@@ -1,8 +1,9 @@
 import cv2
-cap = cv2.VideoCapture('testVideo.MOV')
+cap = cv2.VideoCapture('video.MOV')
+
 while(cap.isOpened()):
   ret, frame = cap.read()
-  cv2.imshow('frame',frame)
+  cv2.imshow('frame', frame)
   if cv2.waitKey(1) & 0xFF == ord('q'):
     break
 
