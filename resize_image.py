@@ -32,11 +32,11 @@ for i in range(1, 21):
             res = cv2.warpAffine(img, M, (w, h))
             cv2.imwrite(new_path, cv2.resize(res, (32, 32)))
 
-        elif j in [14, 15]:  # 明るくになる
+        elif j in [14, 15]:  # 明るくなる
             res = np.uint8(np.clip((cv2.add(1.5 * img, 30)), 0, 255))
             cv2.imwrite(new_path, cv2.resize(res, (32, 32)))
 
-        elif j in [16, 17]:  # 暗くになる
+        elif j in [16, 17]:  # 暗くなる
             res = np.uint8(np.clip((cv2.add(0.6 * img, 0)), 0, 255))
             cv2.imwrite(new_path, cv2.resize(res, (32, 32)))
 

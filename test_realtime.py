@@ -45,7 +45,7 @@ def addText(img, text, left, top, textcolor=(0, 255, 0), textsize=50):
             # linux  /usr/share/fonts/opentype/noto/NotoSansCJK-Ragular.ttc
             # windows  font/simsun.ttc
             # Macos  ~/Library/Fonts/NotoSansCJKjp-Regular.ttf
-            "font/simsun.ttc", textsize, encoding="utf-8")
+            "~/Library/Fonts/NotoSansCJKjp-Regular.ttf", textsize, encoding="utf-8")
         draw.text((left, top), text, textcolor, font=fontText)
         return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 

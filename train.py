@@ -47,15 +47,9 @@ print("Train", X_train.shape, y_train.shape)  # Train (7680, 32, 32, 3) (7680,)
 print("Validation", X_validation.shape, y_validation.shape)  # Validation (1920, 32, 32, 3) (1920,)
 print("Test", X_test.shape, y_test.shape)  # Test (2400, 32, 32, 3) (2400,)
 
-
 X_train = np.array(list(X_train / 255))  # すべての画像を0~255から0~1までの範囲にスケールする.
 X_validation = np.array(list(X_validation / 255))
 X_test = np.array(list(X_test / 255))
-
-# 1の深さを追加する
-X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2], 3)
-X_validation = X_validation.reshape(X_validation.shape[0], X_validation.shape[1], X_validation.shape[2], 3)
-X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[2], 3)
 
 # リアルタイムにデータ拡張する
 dataGen = ImageDataGenerator(width_shift_range=0.1,  # ランダムに水平シフトする範囲
@@ -77,14 +71,16 @@ y_test = to_categorical(y_test, noOfClasses)
 # 畳み込みニューラルネットワークモデル
 model = Sequential()
 # 畳み込み層1，3*3畳み込みカーネル
-model.add((Conv2D(32, (3, 3), input_shape=(imageSize[0], imageSize[1], 3), activation='relu')))
+model.add((Conv2D(32, (3, 3), input_shape=(32, 32, 3), activation='relu')))
+# 畳み込み層2，3*3畳み込みカーネル
 model.add(Conv2D(32, (3, 3), activation='relu'))
 # マックスプーリング層1，2*2カーネル
 model.add(MaxPooling2D(pool_size=(2, 2)))
-# 畳み込み層1，3*3畳み込みカーネル
+# 畳み込み層3，3*3畳み込みカーネル
 model.add(Conv2D(64, (3, 3), activation='relu'))
+# 畳み込み層4，3*3畳み込みカーネル
 model.add(Conv2D(64, (3, 3), activation='relu'))
-# マックスプーリング層1，2*2カーネル
+# マックスプーリング層2，2*2カーネル
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.5))
 
@@ -119,6 +115,6 @@ loss, accuracy = model.evaluate(X_test, y_test)
 print('Test loss:', loss)
 print('Test Accuracy:', accuracy)
 
+cv2.waitKey(0)
 # モデルを保存
 model.save("my_model")
-cv2.waitKey(0)

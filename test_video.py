@@ -6,7 +6,9 @@ import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 model = keras.models.load_model('my_model')  # モデルを読み込む
-cap = cv2.VideoCapture('video.MP4')
+cap = cv2.VideoCapture('car_video.MOV')
+# macos video.MOV
+# windows video.MP4
 
 width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
 height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -44,7 +46,7 @@ def addText(img, text, left, top, textcolor=(0, 255, 0), textsize=50):
             # linux  /usr/share/fonts/opentype/noto/NotoSansCJK-Ragular.ttc
             # windows  font/simsun.ttc
             # Macos  ~/Library/Fonts/NotoSansCJKjp-Regular.ttf
-            "font/simsun.ttc", textsize, encoding="utf-8")
+            "~/Library/Fonts/NotoSansCJKjp-Regular.ttf", textsize, encoding="utf-8")
         draw.text((left, top), text, textcolor, font=fontText)
         return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 
@@ -61,16 +63,16 @@ while True:
 
     cv2.namedWindow("Result", 0)
     cv2.resizeWindow("Result", int(width/3), int(height/3))
-    imgOriginal = addText(imgOriginal, "標識種類:", 10, 35, (18, 11, 222), 200)
-    imgOriginal = addText(imgOriginal, "正確率:", 10, 300, (18, 11, 222), 200)
+    imgOriginal = addText(imgOriginal, "標識種類:", 10, 35, (18, 11, 222), 100)
+    imgOriginal = addText(imgOriginal, "正確率:", 10, 150, (18, 11, 222), 100)
     # 標識を識別
     predictions = model.predict(img)
     classIndex = np.argmax(predictions)
     probabilityValue = np.amax(predictions)
 
     if probabilityValue > 0.75:
-        imgOriginal = addText(imgOriginal, str(getClassName(classIndex)), 1000, 35, (18, 11, 222), 200)
-        imgOriginal = addText(imgOriginal, str(round(probabilityValue * 100, 2)) + "%", 800, 300, (18, 11, 222), 200)
+        imgOriginal = addText(imgOriginal, str(getClassName(classIndex)), 500, 35, (18, 11, 222), 100)
+        imgOriginal = addText(imgOriginal, str(round(probabilityValue * 100, 2)) + "%", 400, 150, (18, 11, 222), 100)
     cv2.imshow("Result", imgOriginal)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
